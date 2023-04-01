@@ -145,4 +145,7 @@ _navi_widget() {
 zle -N _navi_widget
 bindkey '^n' _navi_widget
 
+# tries to run a not found command in toolbox container
+command_not_found_handler() {
+    ~/.local/bin/run-in-toolbox.sh "$1"
 }
