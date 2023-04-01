@@ -70,16 +70,15 @@ ZSH_THEME="sorin" # set by `omz`
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-export ZSH_WAKATIME_BIN=$HOME/.local/bin/wakatime-cli
-plugins=(git asdf fd fzf ripgrep pass git gitignore gh extract fzf-tab wakatime bgnotify poetry)
+plugins=(git asdf fd fzf ripgrep pass gitignore gh extract fzf-tab wakatime bgnotify poetry)
 
 fpath=(~/.zsh/completion $fpath)
 
 export PATH=$HOME/.local/bin:$PATH
 
 autoload -Uz compinit && compinit -i
-source $ZSH/oh-my-zsh.sh
 
+source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
@@ -146,29 +145,4 @@ _navi_widget() {
 zle -N _navi_widget
 bindkey '^n' _navi_widget
 
-export LIBVIRT_DEFAULT_URI=qemu:///session
-
-# vagrant in podman
-vgrnt(){
-    podman run -it --rm \
-           -e NFS=0 \
-           -e LIBVIRT_DEFAULT_URI \
-           -v /var/run/libvirt/:/var/run/libvirt/ \
-           -v ~/.vagrant.d/boxes:/vagrant/boxes \
-           -v ~/.vagrant.d/data:/vagrant/data \
-           -v ~/.vagrant.d/tmp:/vagrant/tmp \
-           -v $(realpath "${PWD}"):${PWD} \
-           -w $(realpath "${PWD}") \
-           --network host \
-           --entrypoint /bin/bash \
-           --security-opt label=disable \
-           vagrantlibvirt/vagrant-libvirt:latest \
-           vagrant $@
 }
-
-# https://github.com/ankitpokhrel/jira-cli#on-premise-installation
-export JIRA_AUTH_TYPE=bearer
-
-
-# jira completion
-eval "$(jira --completion-script-zsh)"
