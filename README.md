@@ -7,4 +7,5 @@
 * https://github.com/asdf-vm/
 ** https://github.com/rbenv/ruby-build/wiki#fedora
 ** https://github.com/pyenv/pyenv/wiki
+** pip install "python-lsp-server[all]"
 * https://github.com/hrkfdn/ncspot
