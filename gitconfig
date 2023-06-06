@@ -1,34 +1,29 @@
 [user]
 	email = petrblaho@gmail.com
 	name = Petr Blaho
-[commit]
-	verbose = true
+
 [core]
 	editor = vim
 	excludesfile = /home/petrblaho/.gitignore
-[pager]
-	diff = diff-so-fancy | less --tabs=4 -RFX --pattern '^(Date|added|deleted|modified): '
-[magithub]
-	online = false
-[magithub "status"]
-	includeStatusHeader = false
-	includePullRequestsSection = false
-	includeIssuesSection = false
-[color]
-	ui = true
-[color "diff-highlight"]
-	oldNormal = red bold
-	oldHighlight = red bold 52
-	newNormal = green
-	newHighlight = green bold 22
-[color "diff"]
-	meta = yellow
-	frag = magenta bold
-	commit = yellow bold
-	old = red bold
-	new = green
-	whitespace = red reverse
-[diff-so-fancy]
-	first-run = false
-[merge]
-	conflictStyle = diff3
+	pager = delta
+
+[commit]
+	verbose = true
+
+[interactive]
+	diffFilter = delta --color-only --features=interactive
+
+[delta]
+	features = decorations
+
+[delta "interactive"]
+	keep-plus-minus-markers = false
+
+[delta "decorations"]
+	commit-decoration-style = blue ol
+	commit-style = raw
+	file-style = omit
+	hunk-header-decoration-style = blue box
+	hunk-header-file-style = red
+	hunk-header-line-number-style = "#067a00"
+	hunk-header-style = file line-number syntax
