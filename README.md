@@ -11,6 +11,9 @@ git clone https://github.com/Aloxaf/fzf-tab ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/p
 git clone https://github.com/wbingli/zsh-wakatime ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-wakatime
 ```
 * https://github.com/syl20bnr/spacemacs/
+```sh
+git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
+```
 * https://github.com/ryanoasis/nerd-fonts/ - Inconsolata Nerd Font Mono for Alacritty
 * https://github.com/tmux-plugins/tpm
 * https://github.com/MrOtherGuy/firefox-csshacks
