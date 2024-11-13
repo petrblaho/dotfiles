@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Define a function that runs a command inside tmux with a temporary window name
+run_with_temp_window_name() {
+    local temp_window_name="$1"  # Temporary window name
+    shift  # Shift the arguments so $@ contains the command and its arguments
+
+    # Check if we are inside a tmux session
+    if [ -n "$TMUX" ]; then
+        # Fetch the current tmux window name
+        local current_window_name=$(tmux display-message -p '#W')
+
+        # Set the new window name to the temporary name
+        tmux rename-window "$temp_window_name"
+
+        # Execute the command
+        "$@"
+
+        # Restore the original window name after the command exits
+        tmux rename-window "$current_window_name"
+    else
+        # If not in tmux, just execute the command normally
+        "$@"
+    fi
+}
+
+run_with_temp_window_name "em" emacsclient --tty "$@" --alternate-editor= 
+
+
