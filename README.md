@@ -19,6 +19,10 @@ git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
 ```sh
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 ```
+* alacritty themes
+```sh
+git clone https://github.com/alacritty/alacritty-theme ~/.config/alacritty/themes
+```
 * https://github.com/MrOtherGuy/firefox-csshacks
 * https://github.com/asdf-vm/
 ** https://github.com/rbenv/ruby-build/wiki#fedora
