@@ -32,10 +32,16 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(
+   '(sql
+     dart
+     csv
+     systemd
      html
      rust
      asciidoc
+     (crystal :variables
+              crystal-backend 'lsp)
+     elixir
      (go :variables
          go-backend 'lsp)
      typescript
@@ -78,7 +84,9 @@ This function should only modify configuration layer settings."
      spacemacs-completion
      spacemacs-modeline
      spacemacs-visual
+     (colors :variables colors-colorize-identifiers 'variables)
      nav-flash
+     dtrt-indent
      (dash :variables dash-docs-docset-newpath "/var/home/petrblaho/.var/app/org.zealdocs.Zeal/data/Zeal/Zeal/docsets")
      (git :variables git-enable-magit-todos-plugin t)
      helm
@@ -92,6 +100,7 @@ This function should only modify configuration layer settings."
           org-enable-transclusion-support t
           org-enable-org-journal-support t
           org-journal-dir (concat org-directory "/journal")
+          org-journal-file-format "%Y-%m-%d"
           org-projectile-file (concat org-directory "/TODOs.org")
           org-enable-jira-support t
           org-jira-working-dir (concat org-directory "/jira")
@@ -99,7 +108,9 @@ This function should only modify configuration layer settings."
           org-enable-roam-support t
           org-roam-directory (concat org-directory "/roam")
           org-roam-db-location (concat org-roam-directory "/db/org-roam.db")
+          org-default-notes-file (concat org-directory "/inbox.org")
           )
+     notmuch
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
@@ -114,11 +125,14 @@ This function should only modify configuration layer settings."
              python-save-before-test t
              python-sort-imports-on-save t)
      ;; spell-checking
-     ;; syntax-checking
+     syntax-checking
      ;; version-control
      treemacs
      (wakatime :variables
                wakatime-cli-path "/home/petrblaho/.local/bin/wakatime-cli")
+     search-engine
+     openai
+     github-copilot
      )
 
 
@@ -610,6 +624,7 @@ Put your configuration code here, except for variables that should be set
 before packages are loaded."
   ;; to include '_' as part of the word
   (setq-default evil-symbol-word-search t)
+  (add-hook 'prog-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
 
   (and(require 'centered-cursor-mode)
       (global-centered-cursor-mode +1))
@@ -631,10 +646,20 @@ before packages are loaded."
   (with-eval-after-load 'org-agenda
     (require 'org-projectile)
     (mapcar (lambda (file)
-               (when (file-exists-p file)
-                 (push file org-agenda-files)))
+              (when (file-exists-p file)
+                (push file org-agenda-files)))
             (org-projectile-todo-files))
     (setq org-journal-enable-agenda-integration t))
+
+  (setq org-id-link-to-org-use-id t)
+  (setq org-id-extra-files 'org-agenda-text-search-extra-files)
+  (org-id-update-id-locations)
+
+  (org-link-set-parameters "id" :complete #'org-id-complete-link)
+
+  (defun org-id-complete-link ()
+    "Create an id: link using completion."
+    (concat "id:" (org-id-get-with-outline-path-completion '((org-agenda-files . (:maxlevel . 2))))))
 
   (with-eval-after-load 'org-jira
     (setq jiralib-token (cons "Authorization"
@@ -644,9 +669,53 @@ before packages are loaded."
   ;; (defun spacemacs//ediff-in-comparison-buffer-p () ())
   (global-wakatime-mode)
 
+  (setq openai-key (getenv "OPENAI_API_KEY"))
+  (setq openai-user "petrblaho")
+
   (setq feature-default-language "cs")
 
-)
+  (setq-default notmuch-search-oldest-first nil)
+
+  (setq notmuch-always-prompt-for-sender t)
+
+  (setq sendmail-program "gmi")
+  (setq send-mail-function 'sendmail-send-it)
+
+  ;; Optional: Don't save outgoing mail locally.
+  (setq notmuch-fcc-dirs nil)
+  (setq message-sendmail-envelope-from 'header)
+
+  (add-hook 'message-send-hook (lambda ()
+                                 (let ((from (cadr
+                                              (mail-extract-address-components
+                                               (message-field-value "From")))))
+                                   (if (string= from "petrblaho@redhat.com")
+                                       (setq message-sendmail-extra-arguments '("send" "--quiet" "--read-recipients" "--path" "/home/petrblaho/mail/rh"))
+                                     (setq message-sendmail-extra-arguments '("send" "--quiet" "--read-recipients" "--path" "/home/petrblaho/mail/google"))))))
+
+  (defun notmuch-show-toggle-unread ()
+    "toggle unread tag for message"
+    (interactive)
+    (if (member "unread" (notmuch-show-get-tags))
+        (notmuch-show-tag (list "-unread"))
+      (notmuch-show-tag (list "+unread"))))
+  (evil-define-key 'normal notmuch-message-mode-map ";" #'notmuch-show-toggle-unread)
+
+  ;; accept completion from copilot and fallback to company
+
+  (with-eval-after-load 'company
+    ;; disable inline previews
+    (delq 'company-preview-if-just-one-frontend company-frontends))
+
+  (with-eval-after-load 'copilot
+    (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+    (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+    (define-key copilot-completion-map (kbd "C-TAB") 'copilot-accept-completion-by-word)
+    (define-key copilot-completion-map (kbd "C-<tab>") 'copilot-accept-completion-by-word))
+
+  (add-hook 'prog-mode-hook 'copilot-mode)
+  (add-to-list 'copilot-major-mode-alist '("enh-ruby" . "ruby"))
+  )
 
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -656,23 +725,33 @@ before packages are loaded."
 This is an auto-generated function, do not modify its content directly, use
 Emacs customize menu instead.
 This function is called at the very end of Spacemacs initialization."
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(evil-want-Y-yank-to-eol nil)
- '(org-agenda-files
-   '("/var/home/petrblaho/org/TODOs.org" "/var/home/petrblaho/org/TODOs.org" "/var/home/petrblaho/org/TODOs.org" "/var/home/petrblaho/org/TODOs.org" "/var/home/petrblaho/org/TODOs.org" "/var/home/petrblaho/org/TODOs.org" "/var/home/petrblaho/org/TODOs.org" "/var/home/petrblaho/org/TODOs.org" "/var/home/petrblaho/org/TODOs.org" "/var/home/petrblaho/org/jira/DRFT.org" "/var/home/petrblaho/org/jira/EVNT.org" "/var/home/petrblaho/org/jira/RHINENG.org" "/var/home/petrblaho/org/jira/projects-list.org" "/var/home/petrblaho/org/journal/20230222"))
- '(package-selected-packages
-   '(popwin yapfify yaml-mode ws-butler which-key web-beautify volatile-highlights uuidgen use-package unfill undo-tree smeargle smartparens rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake rainbow-delimiters pyvenv pytest pyenv-mode py-isort pip-requirements pcre2el origami orgit mwim move-text minitest magit-gitflow magit-popup magit-gh-pulls macrostep lorem-ipsum livid-mode skewer-mode simple-httpd live-py-mode link-hint js2-refactor multiple-cursors js2-mode js-doc indent-guide hydra lv hy-mode hungry-delete highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-pydoc helm-projectile projectile helm-mode-manager helm-make helm-gitignore request helm-flx flx helm-descbinds helm-company helm-c-yasnippet helm-ag github-search github-clone magit magit-section github-browse-file git-timemachine git-messenger git-link git-commit with-editor gist gh marshal logito pcache fuzzy expand-region exec-path-from-shell evil-visualstar evil-escape evil goto-chg eval-sexp-fu elisp-slime-nav dockerfile-mode docker transient tablist json-mode docker-tramp json-snatcher diminish cython-mode company-statistics company-anaconda company column-enforce-mode coffee-mode clean-aindent-mode chruby centered-cursor-mode bundler inf-ruby bind-map bind-key auto-yasnippet yasnippet auto-highlight-symbol ht auto-compile packed anaconda-mode pythonic f dash s aggressive-indent adaptive-wrap ace-window ace-jump-helm-line helm avy helm-core async ac-ispell auto-complete popup)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(highlight-parentheses-highlight ((nil (:weight ultra-bold))) t))
-)
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(evil-want-Y-yank-to-eol nil)
+   '(notmuch-saved-searches
+     '((:name "flagged" :query "tag:flagged" :key "f")
+       (:name "riu" :query "tag:redhat and tag:inbox and tag:unread")
+       (:name "rju" :query "tag:/jira.*/ and tag:unread" :key "j")
+       (:name "rj" :query "tag:/jira.*/" :key "J")
+       (:name "ru" :query "tag:redhat and tag:unread")
+       (:name "ri" :query "tag:redhat and tag:inbox")
+       (:name "pi" :query "tag:personal and tag:inbox and not tag:spam")
+       (:name "pu" :query "tag:personal and tag:unread and not tag:spam")
+       (:name "piu" :query "tag:personal and tag:inbox and tag:unread and not tag:spam")))
+   '(org-agenda-files
+     '("/var/home/petrblaho/org/inbox.org" "/var/home/petrblaho/org/TODOs.org" "/var/home/petrblaho/org/people.org" "/var/home/petrblaho/org/projects.org" "/var/home/petrblaho/org/konflux.org" "/var/home/petrblaho/org/acronyms.org" "/var/home/petrblaho/org/notes.org" "/var/home/petrblaho/org/journal/2024-09-20"))
+   '(package-selected-packages
+     '(yapfify yaml-mode ws-butler which-key web-beautify volatile-highlights uuidgen use-package unfill undo-tree smeargle smartparens rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake rainbow-delimiters pyvenv pytest pyenv-mode py-isort pip-requirements pcre2el origami orgit mwim move-text minitest magit-gitflow magit-popup magit-gh-pulls macrostep lorem-ipsum livid-mode skewer-mode simple-httpd live-py-mode link-hint js2-refactor multiple-cursors js2-mode js-doc indent-guide hydra lv hy-mode hungry-delete highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-pydoc helm-projectile projectile helm-mode-manager helm-make helm-gitignore request helm-flx flx helm-descbinds helm-company helm-c-yasnippet helm-ag github-search github-clone magit magit-section github-browse-file git-timemachine git-messenger git-link git-commit with-editor gist gh marshal logito pcache fuzzy expand-region exec-path-from-shell evil-visualstar evil-escape evil goto-chg eval-sexp-fu elisp-slime-nav dockerfile-mode docker transient tablist json-mode docker-tramp json-snatcher diminish cython-mode company-statistics company-anaconda company column-enforce-mode coffee-mode clean-aindent-mode chruby centered-cursor-mode bundler inf-ruby bind-map bind-key auto-yasnippet yasnippet auto-highlight-symbol ht auto-compile packed anaconda-mode pythonic f dash s aggressive-indent adaptive-wrap ace-window ace-jump-helm-line helm avy helm-core async ac-ispell auto-complete popup)))
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(highlight-parentheses-highlight ((nil (:weight ultra-bold))) t))
+  )
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
