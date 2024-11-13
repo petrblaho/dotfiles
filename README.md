@@ -1,6 +1,15 @@
 * https://github.com/ohmyzsh/ohmyzsh/
-** https://github.com/Aloxaf/fzf-tab
-** https://github.com/wbingli/zsh-wakatime
+```sh
+git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh
+```
+* https://github.com/Aloxaf/fzf-tab
+```sh
+git clone https://github.com/Aloxaf/fzf-tab ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/fzf-tab
+```
+* https://github.com/wbingli/zsh-wakatime
+```sh
+git clone https://github.com/wbingli/zsh-wakatime ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-wakatime
+```
 * https://github.com/syl20bnr/spacemacs/
 * https://github.com/ryanoasis/nerd-fonts/ - Inconsolata Nerd Font Mono for Alacritty
 * https://github.com/tmux-plugins/tpm
