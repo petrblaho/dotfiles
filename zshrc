@@ -70,7 +70,7 @@ ZSH_THEME="sorin" # set by `omz`
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git asdf fzf pass gitignore gh extract fzf-tab wakatime bgnotify poetry timer tmuxinator ssh-agent gpg-agent git-commit)
+plugins=(git asdf fzf pass gitignore gh extract fzf-tab zsh-wakatime bgnotify poetry timer tmuxinator ssh-agent gpg-agent git-commit)
 
 fpath=(~/.zsh/completion $fpath)
 

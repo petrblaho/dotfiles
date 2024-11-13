@@ -1,7 +1,8 @@
-* https://github.com/ryanoasis/nerd-fonts/ - Inconsolata Nerd Font Mono for Alacritty
 * https://github.com/ohmyzsh/ohmyzsh/
 ** https://github.com/Aloxaf/fzf-tab
+** https://github.com/wbingli/zsh-wakatime
 * https://github.com/syl20bnr/spacemacs/
+* https://github.com/ryanoasis/nerd-fonts/ - Inconsolata Nerd Font Mono for Alacritty
 * https://github.com/tmux-plugins/tpm
 * https://github.com/MrOtherGuy/firefox-csshacks
 * https://github.com/asdf-vm/
