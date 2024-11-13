@@ -16,6 +16,9 @@ git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
 ```
 * https://github.com/ryanoasis/nerd-fonts/ - Inconsolata Nerd Font Mono for Alacritty
 * https://github.com/tmux-plugins/tpm
+```sh
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+```
 * https://github.com/MrOtherGuy/firefox-csshacks
 * https://github.com/asdf-vm/
 ** https://github.com/rbenv/ruby-build/wiki#fedora

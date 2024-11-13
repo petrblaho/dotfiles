@@ -1,0 +1,42 @@
+#!/bin/sh
+
+if [ -z ${TMUX+x} ]
+then
+    in_tmux="no"
+else
+    in_tmux="yes"
+fi
+
+fzf_output=$(tmux list-sessions -F \#S 2> /dev/null | fzf --prompt Session: --print-query)
+fzf_rc=$?
+
+if [ $fzf_rc -eq 0 ]
+then
+    session_exists="yes"
+elif [ $fzf_rc -eq 1 ]
+then
+    session_exists="no"
+fi
+
+fzf_out_arr=($fzf_output)
+session=${fzf_out_arr[-1]}
+
+if [[ $in_tmux == "yes" ]]
+then
+    if [[ $session_exists == "yes" ]]
+    then
+        tmux switch-client -t $session
+    else
+        tmux new-session -d -s $session
+        tmux switch-client -t $session
+    fi
+elif [[ $in_tmux == "no" ]]
+then
+    tmux new-session -A -s $session
+# fzf interrupted by user
+elif [ $fzf_rc -eq 130 ]
+then
+    echo 'Interrupted by user'
+else
+    echo 'Error'
+fi
