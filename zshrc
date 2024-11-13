@@ -70,7 +70,7 @@ ZSH_THEME="sorin" # set by `omz`
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git asdf fd fzf ripgrep pass gitignore gh extract fzf-tab wakatime bgnotify poetry)
+plugins=(git asdf fzf pass gitignore gh extract fzf-tab wakatime bgnotify poetry timer tmuxinator ssh-agent gpg-agent git-commit)
 
 fpath=(~/.zsh/completion $fpath)
 
@@ -147,5 +147,29 @@ bindkey '^n' _navi_widget
 
 # tries to run a not found command in toolbox container
 command_not_found_handler() {
-    ~/.local/bin/run-in-toolbox.sh "$1"
+	# echo "$@"
+	~/.local/bin/run-in-toolbox.sh "$@"
 }
+
+# mpd mpc fzf player
+fmpc() {
+  local song_position
+  song_position=$(mpc -f "%position%) %artist% - %title%" playlist | \
+    fzf-tmux --query="$1" --reverse --select-1 --exit-0 | \
+    sed -n 's/^\([0-9]\+\)).*/\1/p') || return 1
+  [ -n "$song_position" ] && mpc -q play $song_position
+}
+
+# krew
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+# jira
+eval "$(jira --completion-script-zsh)"
+
+# tmuxinator
+alias mux=tmuxinator
+
+# some tools to work with podman
+# https://java.testcontainers.org/supported_docker_environment/#podman
+export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock
+export TESTCONTAINERS_RYUK_DISABLED=true
