@@ -30,3 +30,4 @@ git clone https://github.com/alacritty/alacritty-theme ~/.config/alacritty/theme
 ** pip install "python-lsp-server[all]"
 * https://github.com/dandavison/delta
 * https://github.com/hrkfdn/ncspot
+* https://swaywm.org/
